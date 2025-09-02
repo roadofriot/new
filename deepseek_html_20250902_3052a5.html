@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Note Diary</title>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #7209b7;
+            --light-bg: #f8f9fa;
+            --dark-bg: #212529;
+            --light-text: #f8f9fa;
+            --dark-text: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--light-text);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background-color: white;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .add-folder-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .add-folder-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .search-container {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        .folder-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .folder-item {
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .folder-item:hover {
+            background-color: #f1f3f5;
+        }
+
+        .folder-item.active {
+            background-color: #e7f5ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .folder-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .folder-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .folder-item:hover .folder-actions {
+            opacity: 1;
+        }
+
+        .folder-action-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #6c757d;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .folder-action-btn:hover {
+            color: var(--primary-color);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .toolbar {
+            padding: 1rem;
+            background-color: white;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .formatting-toolbar {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .format-btn {
+            padding: 0.5rem;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .format-btn:hover {
+            background: #f8f9fa;
+            border-color: #ced4da;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .save-btn {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #3aa5d6;
+        }
+
+        .export-btn {
+            background-color: #ff9e00;
+            color: white;
+        }
+
+        .export-btn:hover {
+            background-color: #e58c00;
+        }
+
+        .ai-btn {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .ai-btn:hover {
+            background-color: #5f0a9b;
+        }
+
+        .editor-container {
+            flex: 1;
+            padding: 1.5rem;
+            overflow: auto;
+            background-color: #f8f9fa;
+        }
+
+        #editor {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            min-height: 100%;
+            height: 500px;
+        }
+
+        /* AI Assistant Styles */
+        .ai-assistant {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 380px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+            transform: translateY(calc(100% + 2rem));
+            transition: transform 0.3s ease;
+        }
+
+        .ai-assistant.open {
+            transform: translateY(0);
+        }
+
+        .ai-header {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .ai-close {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .ai-chat {
+            height: 300px;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: #e7f5ff;
+            color: var(--dark-text);
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            align-self: flex-start;
+            background-color: #f1f3f5;
+            color: var(--dark-text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .ai-input {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            gap: 0.5rem;
+        }
+
+        .ai-input-field {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .ai-input-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .ai-send-btn {
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .ai-send-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 450px;
+            max-width: 90%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .modal-btn {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .modal-cancel {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-cancel:hover {
+            background-color: #dee2e6;
+        }
+
+        .modal-confirm {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .modal-confirm:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 300px;
+            }
+            
+            .toolbar {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            
+            .formatting-toolbar {
+                order: 2;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .ai-assistant {
+                width: 90%;
+                right: 5%;
+            }
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            --light-bg: #212529;
+            --dark-bg: #f8f9fa;
+            --light-text: #212529;
+            --dark-text: #f8f9fa;
+        }
+
+        .dark-mode .sidebar,
+        .dark-mode .toolbar,
+        .dark-mode .ql-editor {
+            background-color: #2d3436;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .folder-item:hover {
+            background-color: #3d4548;
+        }
+
+        .dark-mode .folder-item.active {
+            background-color: #37474f;
+            color: #4fc3f7;
+        }
+
+        .dark-mode .format-btn {
+            background-color: #2d3436;
+            border-color: #455a64;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .format-btn:hover {
+            background-color: #37474f;
+        }
+
+        .dark-mode .search-input,
+        .dark-mode .form-input {
+            background-color: #2d3436;
+            border-color: #455a64;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .ai-assistant,
+        .dark-mode .modal-content {
+            background-color: #2d3436;
+            color: #f8f9fa;
+        }
+
+        .dark-mode .user-message {
+            background-color: #0066cc;
+            color: white;
+        }
+
+        .dark-mode .ai-message {
+            background-color: #455a64;
+            color: #f8f9fa;
+        }
+
+        /* Quill Editor Customization */
+        .ql-toolbar.ql-snow {
+            border-top-left-radius: var(--border-radius);
+            border-top-right-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+        }
+
+        .ql-container.ql-snow {
+            border-bottom-left-radius: var(--border-radius);
+            border-bottom-right-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+            border-top: none;
+            flex: 1;
+        }
+
+        .ql-editor {
+            min-height: 300px;
+            font-size: 1rem;
+        }
+
+        .dark-mode .ql-toolbar.ql-snow,
+        .dark-mode .ql-container.ql-snow {
+            border-color: #455a64;
+            background-color: #2d3436;
+        }
+
+        .dark-mode .ql-toolbar .ql-stroke {
+            stroke: #f8f9fa;
+        }
+
+        .dark-mode .ql-toolbar .ql-fill {
+            fill: #f8f9fa;
+        }
+
+        .dark-mode .ql-toolbar button:hover .ql-stroke {
+            stroke: var(--primary-color);
+        }
+
+        .dark-mode .ql-toolbar button:hover .ql-fill {
+            fill: var(--primary-color);
+        }
+
+        .dark-mode .ql-toolbar .ql-picker {
+            color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-book"></i>
+            <span>Advanced Note Diary</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+            <span>Dark Mode</span>
+        </button>
+    </header>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Folders</h2>
+                <button class="add-folder-btn" id="addFolderBtn">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search notes...">
+            </div>
+            <div class="folder-list" id="folderList">
+                <!-- Folders will be dynamically added here -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="toolbar">
+                <div class="formatting-toolbar">
+                    <button class="format-btn" data-command="bold" title="Bold">
+                        <i class="fas fa-bold"></i>
+                    </button>
+                    <button class="format-btn" data-command="italic" title="Italic">
+                        <i class="fas fa-italic"></i>
+                    </button>
+                    <button class="format-btn" data-command="underline" title="Underline">
+                        <i class="fas fa-underline"></i>
+                    </button>
+                    <button class="format-btn" data-command="justifyLeft" title="Align Left">
+                        <i class="fas fa-align-left"></i>
+                    </button>
+                    <button class="format-btn" data-command="justifyCenter" title="Align Center">
+                        <i class="fas fa-align-center"></i>
+                    </button>
+                    <button class="format-btn" data-command="justifyRight" title="Align Right">
+                        <i class="fas fa-align-right"></i>
+                    </button>
+                    <button class="format-btn" data-command="insertUnorderedList" title="Bullet List">
+                        <i class="fas fa-list-ul"></i>
+                    </button>
+                    <button class="format-btn" data-command="insertOrderedList" title="Numbered List">
+                        <i class="fas fa-list-ol"></i>
+                    </button>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn save-btn" id="saveBtn">
+                        <i class="fas fa-save"></i>
+                        <span>Save</span>
+                    </button>
+                    <button class="action-btn export-btn" id="exportBtn">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                    <button class="action-btn ai-btn" id="aiBtn">
+                        <i class="fas fa-robot"></i>
+                        <span>AI Assistant</span>
+                    </button>
+                </div>
+            </div>
+            <div class="editor-container">
+                <div id="editor"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- AI Assistant -->
+    <div class="ai-assistant" id="aiAssistant">
+        <div class="ai-header">
+            <h3 class="ai-title">AI Writing Assistant</h3>
+            <button class="ai-close" id="aiClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="ai-chat" id="aiChat">
+            <div class="message ai-message">
+                Hello! I'm your AI writing assistant. How can I help you with your note today?
+            </div>
+        </div>
+        <div class="ai-input">
+            <input type="text" class="ai-input-field" id="aiInput" placeholder="Ask something...">
+            <button class="ai-send-btn" id="aiSend">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Folder Modal -->
+    <div class="modal" id="folderModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Add New Folder</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="folderName" class="form-label">Folder Name</label>
+                    <input type="text" class="form-input" id="folderName" placeholder="Enter folder name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-cancel" id="modalCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="modalConfirm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Export Note</h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Select export format:</label>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="action-btn save-btn" id="exportPdf">
+                            <i class="fas fa-file-pdf"></i>
+                            PDF
+                        </button>
+                        <button class="action-btn export-btn" id="exportDoc">
+                            <i class="fas fa-file-word"></i>
+                            DOC
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div class="modal" id="apiKeyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">AI API Key Required</h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="apiKey" class="form-label">Enter your AI API Key:</label>
+                    <input type="password" class="form-input" id="apiKey" placeholder="Paste your API key here">
+                </div>
+                <p style="font-size: 0.9rem; margin-top: 1rem;">
+                    The AI assistant requires an API key to function. You can obtain one from your AI provider.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn modal-cancel" id="apiKeyCancel">Cancel</button>
+                <button class="modal-btn modal-confirm" id="apiKeyConfirm">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+    
+    <script>
+        // Initialize Quill editor
+        const quill = new Quill('#editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'align': [] }],
+                    ['link', 'image', 'video'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Start typing your note here...'
+        });
+
+        // DOM Elements
+        const themeToggle = document.getElementById('themeToggle');
+        const addFolderBtn = document.getElementById('addFolderBtn');
+        const folderList = document.getElementById('folderList');
+        const searchInput = document.getElementById('searchInput');
+        const saveBtn = document.getElementById('saveBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const aiBtn = document.getElementById('aiBtn');
+        const aiAssistant = document.getElementById('aiAssistant');
+        const aiClose = document.getElementById('aiClose');
+        const aiChat = document.getElementById('aiChat');
+        const aiInput = document.getElementById('aiInput');
+        const aiSend = document.getElementById('aiSend');
+        const folderModal = document.getElementById('folderModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const folderName = document.getElementById('folderName');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalConfirm = document.getElementById('modalConfirm');
+        const exportModal = document.getElementById('exportModal');
+        const exportPdf = document.getElementById('exportPdf');
+        const exportDoc = document.getElementById('exportDoc');
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKey = document.getElementById('apiKey');
+        const apiKeyCancel = document.getElementById('apiKeyCancel');
+        const apiKeyConfirm = document.getElementById('apiKeyConfirm');
+        const formatButtons = document.querySelectorAll('.format-btn');
+
+        // State variables
+        let currentFolderId = null;
+        let currentNoteId = null;
+        let folders = JSON.parse(localStorage.getItem('folders')) || [];
+        let notes = JSON.parse(localStorage.getItem('notes')) || {};
+        let isEditingFolder = false;
+        let editFolderId = null;
+        let aiApiKey = localStorage.getItem('aiApiKey');
+
+        // Initialize the app
+        function init() {
+            renderFolders();
+            loadSampleData();
+            if (folders.length > 0) {
+                selectFolder(folders[0].id);
+            }
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Check if API key is needed
+            if (!aiApiKey) {
+                apiKeyModal.classList.add('open');
+            }
+        }
+
+        // Load sample data if no folders exist
+        function loadSampleData() {
+            if (folders.length === 0) {
+                const sampleFolders = [
+                    { id: '1', name: 'Work Notes' },
+                    { id: '2', name: 'Study Materials' },
+                    { id: '3', name: 'Personal' }
+                ];
+                
+                const sampleNotes = {
+                    '1': {
+                        id: '1',
+                        folderId: '1',
+                        content: '<h2>Meeting Notes</h2><p>Project timeline discussion:</p><ul><li>Phase 1: Research (Completed)</li><li>Phase 2: Development (In progress)</li><li>Phase 3: Testing (Scheduled)</li></ul>',
+                        lastModified: new Date().toISOString()
+                    },
+                    '2': {
+                        id: '2',
+                        folderId: '2',
+                        content: '<h2>Study Plan</h2><p>Topics to cover this week:</p><ol><li>Advanced JavaScript concepts</li><li>CSS Grid and Flexbox</li><li>React component architecture</li></ol>',
+                        lastModified: new Date().toISOString()
+                    }
+                };
+                
+                folders = sampleFolders;
+                notes = sampleNotes;
+                
+                localStorage.setItem('folders', JSON.stringify(folders));
+                localStorage.setItem('notes', JSON.stringify(notes));
+            }
+        }
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Folder management
+            addFolderBtn.addEventListener('click', () => openFolderModal());
+            
+            // Note actions
+            saveBtn.addEventListener('click', saveNote);
+            exportBtn.addEventListener('click', () => exportModal.classList.add('open'));
+            
+            // Formatting buttons
+            formatButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    formatText(button.dataset.command);
+                });
+            });
+            
+            // AI Assistant
+            aiBtn.addEventListener('click', toggleAiAssistant);
+            aiClose.addEventListener('click', toggleAiAssistant);
+            aiSend.addEventListener('click', sendAiMessage);
+            aiInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendAiMessage();
+                }
+            });
+            
+            // Modal actions
+            modalClose.addEventListener('click', closeModals);
+            modalCancel.addEventListener('click', closeModals);
+            modalConfirm.addEventListener('click', confirmFolderAction);
+            
+            // Export actions
+            exportPdf.addEventListener('click', exportAsPdf);
+            exportDoc.addEventListener('click', exportAsDoc);
+            
+            // API Key actions
+            apiKeyCancel.addEventListener('click', () => apiKeyModal.classList.remove('open'));
+            apiKeyConfirm.addEventListener('click', saveApiKey);
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === folderModal) {
+                    closeModals();
+                }
+                if (e.target === exportModal) {
+                    exportModal.classList.remove('open');
+                }
+                if (e.target === apiKeyModal) {
+                    apiKeyModal.classList.remove('open');
+                }
+            });
+        }
+
+        // Toggle dark/light theme
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const icon = themeToggle.querySelector('i');
+            const text = themeToggle.querySelector('span');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                text.textContent = 'Light Mode';
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                text.textContent = 'Dark Mode';
+            }
+        }
+
+        // Render folders in the sidebar
+        function renderFolders() {
+            folderList.innerHTML = '';
+            
+            folders.forEach(folder => {
+                const folderElement = document.createElement('div');
+                folderElement.className = 'folder-item';
+                folderElement.dataset.id = folder.id;
+                
+                if (folder.id === currentFolderId) {
+                    folderElement.classList.add('active');
+                }
+                
+                folderElement.innerHTML = `
+                    <div class="folder-info">
+                        <i class="fas fa-folder"></i>
+                        <span class="folder-name">${folder.name}</span>
+                    </div>
+                    <div class="folder-actions">
+                        <button class="folder-action-btn edit-folder" data-id="${folder.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="folder-action-btn delete-folder" data-id="${folder.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                folderElement.querySelector('.folder-name').addEventListener('click', () => {
+                    selectFolder(folder.id);
+                });
+                
+                folderElement.querySelector('.edit-folder').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editFolder(folder.id);
+                });
+                
+                folderElement.querySelector('.delete-folder').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteFolder(folder.id);
+                });
+                
+                folderList.appendChild(folderElement);
+            });
+        }
+
+        // Select a folder
+        function selectFolder(folderId) {
+            currentFolderId = folderId;
+            renderFolders();
+            
+            // Clear the editor
+            quill.setText('');
+            currentNoteId = null;
+            
+            // Load the first note in the folder if available
+            const folderNotes = Object.values(notes).filter(note => note.folderId === folderId);
+            if (folderNotes.length > 0) {
+                loadNote(folderNotes[0].id);
+            }
+        }
+
+        // Load a note into the editor
+        function loadNote(noteId) {
+            const note = notes[noteId];
+            if (note) {
+                quill.root.innerHTML = note.content;
+                currentNoteId = noteId;
+            }
+        }
+
+        // Open folder modal for add/edit
+        function openFolderModal(editMode = false, folderId = null) {
+            if (editMode) {
+                modalTitle.textContent = 'Edit Folder';
+                const folder = folders.find(f => f.id === folderId);
+                if (folder) {
+                    folderName.value = folder.name;
+                }
+                isEditingFolder = true;
+                editFolderId = folderId;
+            } else {
+                modalTitle.textContent = 'Add New Folder';
+                folderName.value = '';
+                isEditingFolder = false;
+                editFolderId = null;
+            }
+            
+            folderModal.classList.add('open');
+        }
+
+        // Close all modals
+        function closeModals() {
+            folderModal.classList.remove('open');
+            exportModal.classList.remove('open');
+            isEditingFolder = false;
+            editFolderId = null;
+        }
+
+        // Confirm folder action (add/edit)
+        function confirmFolderAction() {
+            const name = folderName.value.trim();
+            
+            if (name) {
+                if (isEditingFolder) {
+                    // Edit existing folder
+                    const folderIndex = folders.findIndex(f => f.id === editFolderId);
+                    if (folderIndex !== -1) {
+                        folders[folderIndex].name = name;
+                    }
+                } else {
+                    // Add new folder
+                    const newFolder = {
+                        id: Date.now().toString(),
+                        name: name
+                    };
+                    folders.push(newFolder);
+                }
+                
+                localStorage.setItem('folders', JSON.stringify(folders));
+                renderFolders();
+                closeModals();
+            }
+        }
+
+        // Edit a folder
+        function editFolder(folderId) {
+            openFolderModal(true, folderId);
+        }
+
+        // Delete a folder
+        function deleteFolder(folderId) {
+            if (confirm('Are you sure you want to delete this folder? All notes in it will be lost.')) {
+                // Remove folder
+                folders = folders.filter(f => f.id !== folderId);
+                localStorage.setItem('folders', JSON.stringify(folders));
+                
+                // Remove notes in this folder
+                for (let noteId in notes) {
+                    if (notes[noteId].folderId === folderId) {
+                        delete notes[noteId];
+                    }
+                }
+                localStorage.setItem('notes', JSON.stringify(notes));
+                
+                renderFolders();
+                
+                // Select the first folder if available
+                if (folders.length > 0 && currentFolderId === folderId) {
+                    selectFolder(folders[0].id);
+                } else if (folders.length === 0) {
+                    currentFolderId = null;
+                    quill.setText('Create a folder to get started...');
+                }
+            }
+        }
+
+        // Save the current note
+        function saveNote() {
+            if (!currentFolderId) {
+                alert('Please select a folder first');
+                return;
+            }
+            
+            const content = quill.root.innerHTML;
+            
+            if (!currentNoteId) {
+                currentNoteId = Date.now().toString();
+            }
+            
+            notes[currentNoteId] = {
+                id: currentNoteId,
+                folderId: currentFolderId,
+                content: content,
+                lastModified: new Date().toISOString()
+            };
+            
+            localStorage.setItem('notes', JSON.stringify(notes));
+            
+            // Show save confirmation
+            const originalText = saveBtn.querySelector('span').textContent;
+            saveBtn.querySelector('span').textContent = 'Saved!';
+            saveBtn.style.backgroundColor = '#2ecc71';
+            
+            setTimeout(() => {
+                saveBtn.querySelector('span').textContent = originalText;
+                saveBtn.style.backgroundColor = '';
+            }, 2000);
+        }
+
+        // Format text in the editor
+        function formatText(command) {
+            quill.focus();
+            quill.format(command, true);
+        }
+
+        // Toggle AI Assistant
+        function toggleAiAssistant() {
+            if (!aiApiKey) {
+                apiKeyModal.classList.add('open');
+                return;
+            }
+            
+            aiAssistant.classList.toggle('open');
+            if (aiAssistant.classList.contains('open')) {
+                aiInput.focus();
+            }
+        }
+
+        // Send message to AI assistant
+        function sendAiMessage() {
+            const message = aiInput.value.trim();
+            
+            if (message) {
+                // Add user message to chat
+                addMessageToChat(message, 'user');
+                aiInput.value = '';
+                
+                // Simulate AI response (in a real app, this would call an API)
+                setTimeout(() => {
+                    const responses = [
+                        "I can help you improve your writing. What specifically would you like assistance with?",
+                        "That's an interesting point. Have you considered expanding on that idea?",
+                        "Based on your note, I suggest adding more details to make it more comprehensive.",
+                        "Your writing is good, but you could strengthen it by providing examples.",
+                        "I can help you reorganize this content for better clarity if you'd like.",
+                        "You might want to add a summary at the end to reinforce your main points.",
+                        "Consider using bullet points to make this information more scannable.",
+                        "This section could benefit from a heading to improve readability."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessageToChat(randomResponse, 'ai');
+                }, 1000);
+            }
+        }
+
+        // Add message to AI chat
+        function addMessageToChat(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${sender}-message`;
+            messageElement.textContent = message;
+            aiChat.appendChild(messageElement);
+            aiChat.scrollTop = aiChat.scrollHeight;
+        }
+
+        // Export note as PDF
+        function exportAsPdf() {
+            // This would use jsPDF in a real implementation
+            alert('PDF export functionality would be implemented here. Note content would be converted to PDF format and downloaded.');
+            exportModal.classList.remove('open');
+        }
+
+        // Export note as DOC
+        function exportAsDoc() {
+            // This would use docx.js in a real implementation
+            alert('DOC export functionality would be implemented here. Note content would be converted to Word format and downloaded.');
+            exportModal.classList.remove('open');
+        }
+
+        // Save API key
+        function saveApiKey() {
+            const key = apiKey.value.trim();
+            if (key) {
+                aiApiKey = key;
+                localStorage.setItem('aiApiKey', key);
+                apiKeyModal.classList.remove('open');
+                alert('API key saved successfully!');
+            }
+        }
+
+        // Initialize the app when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
